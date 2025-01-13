@@ -1,0 +1,43 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+.env
+
+# Environment variables
+.env
+*.env
+
+# PDF files (if any temporary PDFs are generated or uploaded)
+*.pdf
+
+# Streamlit cache
+.streamlit/
+.stcache/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# FAISS index files (if saved locally)
+*.faiss
+*.idx
+
+# IDE-specific files
+.idea/
+.vscode/
+*.code-workspace
+
+# Jupyter Notebook checkpoints (if used for testing)
+.ipynb_checkpoints/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# HTML/CSS templates (if dynamically generated or temporary)
+htmlTemplates.py
