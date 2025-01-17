@@ -8,6 +8,30 @@ from langchain_openai import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
+import speech_recognition as sr
+
+import speech_recognition as sr
+
+def get_audio_input():
+    """Capture audio input from the microphone and convert it to text."""
+    try:
+        recognizer = sr.Recognizer()
+        with sr.Microphone() as source:
+            st.info("Listening... Speak now.")
+            recognizer.adjust_for_ambient_noise(source, duration=1)
+            audio = recognizer.listen(source, timeout=10, phrase_time_limit=10)
+            st.info("Processing speech...")
+            user_text = recognizer.recognize_google(audio)
+            st.success(f"Recognized: {user_text}")
+            return user_text  # Return recognized text
+    except sr.WaitTimeoutError:
+        st.error("Listening timed out. Please try again.")
+    except sr.RequestError:
+        st.error("Could not request results. Check your internet connection.")
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+    return None
+
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -79,16 +103,43 @@ def main():
         
     if "user_input" not in st.session_state:
         st.session_state.user_input = ""
+        
+    if "audio_text" not in st.session_state:
+        st.session_state.audio_text = ""
     
     st.header("Chat with multiple PDFs :books:")
-    user_question = st.text_input("Ask a question about your documents:")
     
-    if user_question:
-        handle_user_input(user_question)
+    # Create columns for the input area
+    col1, col2 = st.columns([4, 1])
+    
+    with col1:
+        # Text input field
+        user_question = st.text_input(
+            "Ask a question about your documents:",
+            value=st.session_state.audio_text,
+            key="user_question"
+        )
+
+    with col2:
+        # Audio input button
+        if st.button("🎤 Speak", key="speak_button"):
+            recognized_text = get_audio_input()
+            if recognized_text:
+                st.session_state.audio_text = recognized_text
+                st.rerun()
+
+    # Handle user input
+    if st.button("Submit Question"):
+        if user_question:
+            handle_user_input(user_question)
+            st.session_state.audio_text = ""
     
     with st.sidebar:
         st.subheader("Your documents")
-        pdf_docs = st.file_uploader("Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
+        pdf_docs = st.file_uploader(
+            "Upload your PDFs here and click on 'Process'", accept_multiple_files=True
+        )
+        
         if st.button("Process"):
             with st.spinner("Processing"):
                 # get the pdf text
